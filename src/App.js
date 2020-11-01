@@ -4,8 +4,8 @@ import './App.css';
 import { withAuthenticator, AmplifySignOut } from '@aws-amplify/ui-react'
 import Amplify from 'aws-amplify';
 import { API, Storage } from 'aws-amplify';
-import { listNotes } from './graphql/queries'
-import { createNote as createNoteMutation, deleteNote as deleteNoteMutation} from './graphql/mutations'
+import { listTodos } from './graphql/queries'
+import { createTodo as createTodoMutation, deleteTodo as deleteTodoMutation} from './graphql/mutations'
 
 const initialFormState = { name: '', description: '' }
 
@@ -26,8 +26,8 @@ function App() {
   }
 
   async function fetchNotes() {
-    const apiData = await API.graphql( {query: listNotes });
-    const notesFromAPI = apiData.data.listNotes.items;
+    const apiData = await API.graphql( {query: listTodos });
+    const notesFromAPI = apiData.data.listTodos.items;
     await Promise.all(notesFromAPI.map(async note => {
       if (note.image) {
         const image = await Storage.get(note.image);
@@ -35,14 +35,14 @@ function App() {
       }
       return note;
     }))
-    setNotes(apiData.data.listNotes.items);
+    setNotes(apiData.data.listTodos.items);
   }
 
   async function createNote() {
     if (!formData.name || !formData.description) return;
-    await API.graphql({ query: createNoteMutation, variables: { input: formData }});
+    await API.graphql({ query: createTodoMutation, variables: { input: formData }});
     if (formData.iamge) {
-      const image = await Storage.get(formData.image);
+      const image = await Storage.put(formData.image);
       formData.image = image;
     }
     setNotes([ ...notes, formData ]);
@@ -52,7 +52,7 @@ function App() {
   async function deleteNote({ id }) {
     const newNotesArray = notes.filter(note => note.id !== id);
     setNotes(newNotesArray);
-    await API.graphql({ query: deleteNoteMutation, variables: { input: { id }}});
+    await API.graphql({ query: deleteTodoMutation, variables: { input: { id }}});
   }
 
   return (
