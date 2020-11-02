@@ -16,6 +16,7 @@ function App() {
   useEffect( () => {
     fetchNotes();
   }, []);
+  
 
   // async function onChange(e) {
   //   if (!e.target.files[0]) return
